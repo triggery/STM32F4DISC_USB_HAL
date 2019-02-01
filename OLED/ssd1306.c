@@ -64,7 +64,7 @@ uint8_t ssd1306_Init(void)
 	SSD1306.CurrentY = 0;
 	
 	SSD1306.Initialized = 1;
-	
+
 	return 1;
 }
 

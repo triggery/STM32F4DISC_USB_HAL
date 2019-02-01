@@ -77,6 +77,8 @@ FIL MyFile;
 FRESULT res;
 
 int main(void) {
+	char buff[20];
+	UINT cnt;
 
 	HAL_Init();
 
@@ -86,21 +88,22 @@ int main(void) {
 	MX_I2C1_Init();	// Audio control
 	MX_I2C3_Init();	// LCD
 	MX_I2S3_Init();	// Audio data
-	MX_SPI1_Init();
+	MX_SPI1_Init();	// MEMS
 
-	ssd1306_Init();
 	HAL_Delay(500);
-
+	ssd1306_Init();
 	ssd1306_SetCursor(10, 5);
 	ssd1306_WriteString("Dimas", Font_11x18, White);
 	ssd1306_UpdateScreen();
 
 	MX_USB_HOST_Init();
 	MX_FATFS_Init();
-	/* USER CODE BEGIN 2 */
+
 	while (Appli_state != APPLICATION_START) {
 		MX_USB_HOST_Process();
 	}
+
+	HAL_Delay(500);
 
 	Appli_state = APPLICATION_IDLE;
 	if (f_mount(&USBDISKFatFs, "0", 0) != FR_OK) {
@@ -112,6 +115,11 @@ int main(void) {
 			HAL_GPIO_WritePin(GPIOD, LD3_Pin, GPIO_PIN_SET);
 		} else {
 			HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_SET);
+			f_read(&MyFile, buff, sizeof(buff), &cnt);
+			ssd1306_Fill(Black);
+			ssd1306_SetCursor(10, 5);
+			ssd1306_WriteString(buff, Font_11x18, White);
+			ssd1306_UpdateScreen();
 			f_close(&MyFile);
 		}
 	}
@@ -120,32 +128,6 @@ int main(void) {
 
 	}
 }
-
-/* USER CODE END WHILE */
-//MX_USB_HOST_Process();
-/*if(Appli_state == APPLICATION_START) {
- Appli_state = APPLICATION_IDLE;
- if(f_mount(&USBDISKFatFs, "0:/", 0) != FR_OK) {
- HAL_GPIO_WritePin(GPIOD, LD3_Pin, GPIO_PIN_SET);
- }
- else {
- HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_SET);
- if(f_open(&MyFile, "plane.txt", FA_READ) != FR_OK)
- {
- HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_RESET);
- HAL_GPIO_WritePin(GPIOD, LD3_Pin, GPIO_PIN_SET);
-
- f_close(&MyFile);
- }
- else{
- HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_SET);
- }
- }
- }
- else if(Appli_state==APPLICATION_IDLE) {
-
- }*/
-/* USER CODE BEGIN 3 */
 
 /**
  * @brief System Clock Configuration
